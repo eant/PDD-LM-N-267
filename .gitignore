@@ -1,3 +1,5 @@
 Selenium/chromedriver
 Clase 11/claves.txt
-Clase 12/python_modules
+*/python_modules
+*/.env
+.DS_Store
