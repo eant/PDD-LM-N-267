@@ -1,4 +1,4 @@
-from flask import Flask, json
+from flask import Flask, json, request
 from pymongo import MongoClient
 from os import environ
 from urllib.parse import urlencode
@@ -50,7 +50,7 @@ def searchTwitter(path):
     return response
 
 ###################
-@app.route('/api/tweets/<user>/<limit>')
+@app.route('/api/tweets/<user>/<limit>', methods = ['GET'])
 def getTweets(user, limit):
 
     bigdata = client['bigdata']
@@ -79,6 +79,32 @@ def getTweets(user, limit):
         }
 
         response.append( el_tweet )
+
+    return app.response_class( response = json.dumps(response), status = 200, mimetype = 'application/json' )
+
+###################
+@app.route('/api/tweets', methods = ['POST'])
+def postTweets():
+
+    bigdata = client['bigdata']
+    tweets = bigdata['tweets']
+
+    '''
+    print('El usuario es:')
+    print( request.form['id'] )
+    print( request.form['user'] )
+    print( request.form['message'] )
+    '''
+
+    el_tweet = {
+        'id_str' : request.form['id'],
+        'in_reply_to_screen_name' : request.form['user'],
+        'full_text' : request.form['message']
+    }
+
+    result = tweets.insert_one( el_tweet )
+
+    response = [{ 'ok' : True, 'mgs' : 'Tweet saved!' }] if result.acknowledged == True else [{ 'ok' : False, 'msg' : 'Error...' }]
 
     return app.response_class( response = json.dumps(response), status = 200, mimetype = 'application/json' )
 
